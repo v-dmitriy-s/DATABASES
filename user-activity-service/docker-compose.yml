@@ -1,0 +1,18 @@
+version: '3.8'
+
+
+services:
+  cassandra:
+    image: cassandra:4.0
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+      - ./init-scripts/create-keyspace.cql:/docker-entrypoint-initdb.d/create-keyspace.cql
+    environment:
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
+      - CASSANDRA_CLUSTER_NAME=MyCluster
+
+volumes:
+  cassandra_data:

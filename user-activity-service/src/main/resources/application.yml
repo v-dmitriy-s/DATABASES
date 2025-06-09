@@ -1,0 +1,31 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: user-activity-service
+  cassandra:
+    contact-points: localhost
+    port: 9042
+    local-datacenter: datacenter1
+    keyspace-name: my_keyspace
+    schema-action: CREATE_IF_NOT_EXISTS
+    replication-config: "{'class':'SimpleStrategy','replication_factor':1}"
+    request:
+      timeout: 20s
+      page-size: 5000
+    connection:
+      connect-timeout: 10s
+      init-query-timeout: 15s
+
+
+product:
+  service:
+    url: http://localhost:8082
+
+logging:
+  level:
+    org.springframework: INFO
+

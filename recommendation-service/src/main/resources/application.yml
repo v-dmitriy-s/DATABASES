@@ -1,0 +1,34 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: recommendation-service
+
+  ai:
+    ollama:
+      base-url: http://localhost:11434  # default Ollama endpoint
+      embedding:
+        model: nomic-embed-text         # or "all-minilm" or another
+    vectorstore:
+      qdrant:
+        host: localhost
+        port: 6334
+#        api-key: <qdrant api key>
+        collection-name: recommendations
+        use-tls: false
+        initialize-schema: true
+      pinecone:
+        api-key: pcsk_3deSzj_7LyLKzWyyVfwBbWxag1QafMLJnfVYBTwLmQeTWZcezZutasKA1yBynkbbLPgUsh
+        index-name: product-recommendations
+
+product:
+  service:
+    url: http://localhost:8082
+
+logging:
+  level:
+    org.springframework: INFO
+

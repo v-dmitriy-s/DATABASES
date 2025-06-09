@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* File: styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --color-primary: #1f2937; /* gray-800 */
+    --color-accent: #6366f1;  /* indigo-500 */
+    --color-muted: #9ca3af;  /* gray-400 */
+    --color-bg: #f9fafb;      /* gray-50 */
+    --color-dark: #111827;    /* gray-900 */
+    --radius-base: 1rem;
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* take full remaining space in body */
+}
+
+section {
+    flex: 1; /* expand to fill space between header and footer */
+}
+
+
+body {
+    @apply font-sans bg-[var(--color-bg)] text-[var(--color-primary)] antialiased;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Reusable utilities */
+.btn-primary {
+    @apply bg-[var(--color-accent)] text-white px-5 py-2 rounded-xl shadow-md hover:bg-indigo-600 transition;
+}
+
+.card {
+    @apply bg-white p-5 rounded-2xl shadow hover:shadow-lg transition;
+}
+
+.section-title {
+    @apply text-2xl font-semibold text-[var(--color-dark)] mb-4;
+}
+
+.text-muted {
+    @apply text-[var(--color-muted)];
+}
+
+.input-field {
+    @apply border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full;
+}
+
