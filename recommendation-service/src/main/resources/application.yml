@@ -20,9 +20,6 @@ spring:
         collection-name: recommendations
         use-tls: false
         initialize-schema: true
-      pinecone:
-        api-key: pcsk_3deSzj_7LyLKzWyyVfwBbWxag1QafMLJnfVYBTwLmQeTWZcezZutasKA1yBynkbbLPgUsh
-        index-name: product-recommendations
 
 product:
   service:
