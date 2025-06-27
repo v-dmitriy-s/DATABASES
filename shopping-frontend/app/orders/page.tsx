@@ -1,43 +1,74 @@
 // File: app/orders/page.tsx
 "use client";
 
-import {useEffect, useState} from "react";
-import {API} from "@/lib/api";
-import {useRouter} from "next/navigation"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-
-interface Order {
-    id: string;
-    createdAt: string;
-    total: number;
-    status: string;
-    paymentMethod: string,
-    trackingNumber?: string,
-    shipping: number,
-    items: { name: string; quantity: number; price: number, image: string }[];
-}
+import { Order, OrderStatus } from "../types/order";
+import { OrderService } from "../services/orderService";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {
-        fetch(`${API.order}/api/orders`, {
-            headers: {
-                "X-User-Email": "user@example.com" // Replace with actual user session email
-            }
-        })
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch orders");
-                return res.json();
-            })
-            .then(setOrders)
-            .catch((err) => {
+        const fetchOrders = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const data = await OrderService.getOrders();
+                setOrders(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "Failed to load orders");
                 console.error(err);
-                alert("Failed to load orders");
-            });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchOrders();
     }, []);
+
+    const getStatusColor = (status: OrderStatus) => {
+        const colors = {
+            Delivered: "bg-green-100 text-green-800",
+            Shipped: "bg-blue-100 text-blue-800",
+            Processing: "bg-yellow-100 text-yellow-800",
+            Pending: "bg-gray-100 text-gray-800"
+        };
+        return colors[status] || colors.Pending;
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="bg-white p-8 rounded-xl shadow-sm text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Orders</h3>
+                    <p className="text-gray-500 mb-4">{error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -59,13 +90,13 @@ export default function OrdersPage() {
                 </div>
 
                 <h1 className="text-3xl font-bold mb-2 flex items-center">
-      <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full mr-4">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
-             stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-      </span>
+                    <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-3 rounded-full mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                    </span>
                     My Orders
                 </h1>
 
@@ -79,7 +110,7 @@ export default function OrdersPage() {
                                   d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                         <h3 className="text-lg font-medium text-gray-700 mb-2">No orders yet</h3>
-                        <p className="text-gray-500 mb-4">You haven't placed any orders yet.</p>
+                        <p className="text-gray-500 mb-4">You haven&apos;t placed any orders yet.</p>
                         <Link href="/"
                               className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-colors">
                             Start Shopping
@@ -96,35 +127,32 @@ export default function OrdersPage() {
                                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                                         <h2 className="text-lg font-semibold text-gray-800">Order #{order.id}</h2>
                                         <div className="flex items-center mt-2 sm:mt-0">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                          order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' :
-                              order.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-gray-100 text-gray-800'
-                  }`}>
-                    {order.status}
-                  </span>
-                                            <span
-                                                className="text-sm text-gray-500 ml-3">{new Date(order.createdAt).toLocaleDateString('en-US', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}</span>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status as OrderStatus)}`}>
+                                                {order.status}
+                                            </span>
+                                            <span className="text-sm text-gray-500 ml-3">
+                                                {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit"
+                                                })}
+                                            </span>
                                         </div>
                                     </div>
 
                                     <div className="border-t border-gray-100 pt-4">
                                         {order.items.map((item, index) => (
                                             <div key={index} className="flex items-center py-3">
-                                                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-4">
+                                                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-4 relative">
                                                     <Image
                                                         src={item.image}
                                                         alt={item.name}
-                                                        width={64}
-                                                        height={64}
+                                                        fill
+                                                        sizes="64px"
                                                         className="object-cover"
+                                                        loading="lazy"
                                                     />
                                                 </div>
                                                 <div className="flex-1">
@@ -141,27 +169,29 @@ export default function OrdersPage() {
                                         ))}
                                     </div>
 
-                                    <div
-                                        className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center">
+                                    <div className="border-t border-gray-100 pt-4 mt-4 flex justify-between items-center">
                                         <div>
-                                            <p className="text-sm text-gray-600">Payment method: <span
-                                                className="font-medium">{order.paymentMethod || 'Credit Card'}</span>
+                                            <p className="text-sm text-gray-600">
+                                                Payment method: <span className="font-medium">{order.paymentMethod || "Credit Card"}</span>
                                             </p>
                                             {order.trackingNumber && (
-                                                <p className="text-sm text-gray-600 mt-1">Tracking: <span
-                                                    className="font-medium">{order.trackingNumber}</span></p>
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    Tracking: <span className="font-medium">{order.trackingNumber}</span>
+                                                </p>
                                             )}
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-gray-600">Subtotal: <span
-                                                className="font-medium">${(order.total - (order.shipping || 0)).toFixed(2)}</span>
+                                            <p className="text-sm text-gray-600">
+                                                Subtotal: <span className="font-medium">${(order.total - (order.shipping || 0)).toFixed(2)}</span>
                                             </p>
                                             {order.shipping > 0 && (
-                                                <p className="text-sm text-gray-600">Shipping: <span
-                                                    className="font-medium">${order.shipping.toFixed(2)}</span></p>
+                                                <p className="text-sm text-gray-600">
+                                                    Shipping: <span className="font-medium">${order.shipping.toFixed(2)}</span>
+                                                </p>
                                             )}
-                                            <p className="text-lg font-bold text-blue-600 mt-1">Total:
-                                                ${order.total.toFixed(2)}</p>
+                                            <p className="text-lg font-bold text-blue-600 mt-1">
+                                                Total: ${order.total.toFixed(2)}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -182,7 +212,7 @@ export default function OrdersPage() {
                 )}
             </div>
 
-            {/* Footer - consistent with main page */}
+            {/* Footer */}
             <footer className="bg-gray-800 text-white py-12">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="border-t border-gray-700 pt-8">
@@ -191,15 +221,15 @@ export default function OrdersPage() {
                                 <p className="text-gray-400 text-sm">© 2025 AI Shop. All rights reserved.</p>
                             </div>
                             <div className="flex space-x-6">
-                                <Link href="/privacy"
-                                      className="text-gray-400 hover:text-white text-sm transition-colors">Privacy
-                                    Policy</Link>
-                                <Link href="/terms"
-                                      className="text-gray-400 hover:text-white text-sm transition-colors">Terms of
-                                    Service</Link>
-                                <Link href="/cookies"
-                                      className="text-gray-400 hover:text-white text-sm transition-colors">Cookie
-                                    Policy</Link>
+                                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                                    Privacy Policy
+                                </Link>
+                                <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                                    Terms of Service
+                                </Link>
+                                <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
+                                    Cookie Policy
+                                </Link>
                             </div>
                         </div>
                     </div>

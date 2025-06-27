@@ -1,17 +1,13 @@
 package com.dtit.product.config;
 
-import com.dtit.product.model.Product;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.dtit.product.domain.Product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -34,8 +30,7 @@ public class RedisConfig {
         Jackson2JsonRedisSerializer<Object> valueSerializer =
                 new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
 
-        // Override deserialization to handle List<Product>
-        valueSerializer.setObjectMapper(objectMapper);
+        // Set default serializer
         template.setDefaultSerializer(valueSerializer);
 
         // Key serializer (String)

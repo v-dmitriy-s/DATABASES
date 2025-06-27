@@ -23,9 +23,9 @@ public class RecommendationService {
 
         List<Document> results = vectorStore.similaritySearch(query);
 
-        List<String> productIds = results.stream()
-                .map(Document::getId)
-                .toList();
+        List<String> productIds = results != null ? results.stream()
+                .map(doc -> doc.getMetadata().get("product_id").toString())
+                .toList() : null;
 
 
 

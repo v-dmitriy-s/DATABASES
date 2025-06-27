@@ -21,9 +21,9 @@ public class IndexingService {
 
         List<Document> documents = products.stream()
                 .map(p -> Document.builder()
-                        .id(p.id())
                         .text(p.name() + " " + p.description())
                         .metadata(Map.of(
+                                "product_id", p.id(),
                                 "name", p.name(),
                                 "description", p.description(),
                                 "image", p.image(),

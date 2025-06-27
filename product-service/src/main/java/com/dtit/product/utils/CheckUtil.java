@@ -2,7 +2,7 @@ package com.dtit.product.utils;
 
 import com.dtit.product.clients.InventoryClient;
 import com.dtit.product.clients.InventoryItem;
-import com.dtit.product.model.Product;
+import com.dtit.product.domain.Product;
 import lombok.experimental.UtilityClass;
 import org.slf4j.Logger;
 
@@ -15,9 +15,9 @@ public class CheckUtil {
     public static boolean checkInStock(Product product, InventoryClient inventoryClient, Logger log) {
         AtomicBoolean inStock = new AtomicBoolean(false);
         try {
-            List<InventoryItem> stockList = inventoryClient.getStockByProduct(product.getId());
+            List<InventoryItem> stockList = inventoryClient.getStockByProduct(product.getProductId());
             stockList.stream()
-                    .filter(item -> item.productId().equals(product.getId()))
+                    .filter(item -> item.productId().equals(product.getProductId()))
                     .findFirst()
                     .ifPresent(item -> inStock.set(item.stock() > 0));
 

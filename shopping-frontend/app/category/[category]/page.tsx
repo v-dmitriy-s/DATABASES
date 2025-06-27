@@ -110,7 +110,7 @@ export default function CategoryPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <h3 className="text-xl font-medium text-gray-700 mb-2">No products found</h3>
-                        <p className="text-gray-500 mb-6">We couldn't find any products in this category.</p>
+                        <p className="text-gray-500 mb-6">We couldn&apos;t find any products in this category.</p>
                         <Link href="/" className="inline-block bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-2 rounded-full transition-all shadow-md">
                             Browse All Products
                         </Link>
